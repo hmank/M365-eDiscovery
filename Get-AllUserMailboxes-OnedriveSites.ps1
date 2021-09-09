@@ -1,6 +1,6 @@
 ﻿#############################################################################
 #  This script is used to read export all users Primary SMTP Email addresses
-#  and Onedrive personal sites.
+#  and Onedrive personal sites and export them to a csv file.
 #  
 #  
 #  Sept 8, 2021
