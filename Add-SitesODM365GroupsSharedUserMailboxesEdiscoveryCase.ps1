@@ -7,8 +7,7 @@
 #
 # Version 1.0
 # Author: Habib Mankal
-# CSV Column Headers
-# SiteUrl
+# 
 # ##############################################################################
 
 $day = (get-date).day
