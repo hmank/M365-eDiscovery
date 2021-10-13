@@ -1,7 +1,7 @@
 ﻿#############################################################################
 #  This script is used to read all Microsoft 365 group and Shared mailboxes
 #  and export them to a csv file to be used in a script to add
-#  the mailboes to an eDiscovery Case.
+#  the mailboxes to an eDiscovery Case.
 #
 # August 20, 2021
 #
