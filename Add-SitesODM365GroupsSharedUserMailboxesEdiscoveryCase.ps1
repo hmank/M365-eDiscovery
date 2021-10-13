@@ -28,7 +28,7 @@ if (!$SccSession)
 
 write-host "***********************************************"
 write-host "   Security & Compliance Center PowerShell  " -foregroundColor yellow -backgroundcolor darkgreen
-write-host "   Add Sharepoint Sites, Microsoft 365 Groups and Shared Mailboxes to eDiscovery Case   " -foregroundColor yellow -backgroundcolor darkgreen 
+write-host "   Add Sharepoint or OneDrive Sites, User, Microsoft 365 Groups,Shared Mailboxes to eDiscovery Case   " -foregroundColor yellow -backgroundcolor darkgreen 
 write-host "***********************************************"
 " "
 do{
@@ -38,6 +38,8 @@ write-host "   [1] - Sharepoint Sites   " -foregroundColor yellow -backgroundcol
 write-host "   [2] - Microsoft 365 Groups   " -foregroundColor yellow -backgroundcolor darkgreen
 write-host "   [3] - Shared Mailboxes  " -foregroundColor yellow -backgroundcolor darkgreen 
 write-host "   [4] - User Mailboxes and OneDrive Sites  " -foregroundColor yellow -backgroundcolor darkgreen 
+write-host "   [5] - Teams User chats (User mailboxes)" -foregroundColor yellow -backgroundcolor darkgreen 
+write-host "   [6] - Teams Channel conversations (Teams Mailboxes)" -foregroundColor yellow -backgroundcolor darkgreen 
 
 $userInput = Read-Host "Select Option & Press Enter: " 
 write-host "***********************************************"
@@ -48,17 +50,19 @@ switch ($userInput){
     '2' {"[2]- Microsoft365 Groups Selected"}
     '3' {"[3]- Shared Mailboxes Selected"}
     '4' {"[4]- User Mailboxes and OneDrive Sites"}
+    '5' {"[5]- Teams User chats (User mailboxes)" }
+    '6' {"[6]- Teams Channel conversations (Teams Mailboxes)" }
 
     }#switch
     
 }
-While (($userInput -ne '1') -and ($userInput -ne '2') -and ($userInput -ne '3') -and ($userInput -ne '4') )
+While (($userInput -ne '1') -and ($userInput -ne '2') -and ($userInput -ne '3') -and ($userInput -ne '4') -and ($userInput -ne '5') -and ($userInput -ne '6')  )
 
 "" 
 
 # Get other required information
 do{
-Get-ComplianceCase -CaseType AdvancedEdiscovery | Select Name, Casetype ; Get-ComplianceCase | Select Name, Casetype
+Get-ComplianceCase -CaseType AdvancedEdiscovery | Select-Object Name, Casetype ; Get-ComplianceCase | Select-Object Name, Casetype
 $casename = $(Write-Host "Enter the name of the existing case: " -foregroundColor yellow -backgroundcolor darkgreen -NoNewline; Read-Host)
 $caseexists = (get-compliancecase -identity "$casename" -erroraction SilentlyContinue).isvalid
 if($caseexists -ne 'True')
@@ -153,7 +157,7 @@ Try{
                 If ($userInput -eq 4){   #Import User Mailboxes and Onedrive sites
         do{
         ""
-        $UserMBXODinputfile = $(Write-Host "Enter the name full path of the csv file that contains the Microsoft 365 Groups to place on hold. eg c:\Temp\AllM365Groups.csv :" -NoNewline;read-host)
+        $UserMBXODinputfile = $(Write-Host "Enter the name full path of the csv file that contains the users mailbox and onedrive to place on hold. eg c:\Temp\AllM365Groups.csv :" -NoNewline;read-host)
         ""
         $fileexists = test-path -path $UserMBXODinputfile
              if($fileexists -ne 'True'){write-host "$UserMBXODinputfile doesn't exist. Please enter a valid path and filename." -foregroundcolor Yellow}
@@ -180,6 +184,56 @@ Try{
 
 
         } #if
+
+     If ($userInput -eq 5) {
+          #Import User Teams chat (User mailboxes)
+          do {
+               ""
+               $UserMBXinputfile = $(Write-Host "Enter the name full path of the csv file that contains the Microsoft 365 Groups to place on hold. eg c:\Temp\AllM365Groups.csv :" -NoNewline; read-host)
+               ""
+               $fileexists = test-path -path $UserMBXinputfile
+               if ($fileexists -ne 'True') { write-host "$UserMBXinputfile doesn't exist. Please enter a valid path and filename." -foregroundcolor Yellow }
+          }while ($fileexists -ne 'True')
+            
+             
+                               
+          [Array]  $importUserMBXArray = @(Import-Csv $UserMBXinputfile).PrimarySmtpAddress
+              
+          $importUserMBX = $null                  
+          $importUserMBXArray = $importUserMBXArray | Where-Object { $_ }
+          $importUserMBX = $importUserMBXArray[0..999] -join ","
+          $importUserMBX = $importUserMBXArray -split ' *, *'
+                                        
+          New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -ExchangeLocation $importUserMBX -Enabled $True -verbose -Force
+          New-CaseHoldRule -Name "$holdName" -Policy "$holdName" -ContentMatchQuery "(c:c)(ItemClass=IPM.Note.Microsoft.Conversation)(ItemClass=IPM.Note.Microsoft.Missed)(ItemClass=IPM.Note.Microsoft.Conversation.Voice)(ItemClass=IPM.Note.Microsoft.Missed.Voice)(ItemClass=IPM.SkypeTeams.Message)" -Verbose
+
+
+     } #if
+
+     If ($userInput -eq 6) {
+          #Import Microsoft 365 Groups.
+          do {
+               ""
+               $msTeamsMbxinputfile = $(Write-Host "Enter the name full path of the csv file that contains the Microsoft 365 Groups to place on hold. eg c:\Temp\AllM365Groups.csv :" -NoNewline; read-host)
+               ""
+               $fileexists = test-path -path $m365groupinputfile
+               if ($fileexists -ne 'True') { write-host "$m365groupinputfile doesn't exist. Please enter a valid path and filename." -foregroundcolor Yellow }
+          }while ($fileexists -ne 'True')
+            
+             
+                               
+          [Array]  $msTeamsMbxArray = @(Import-Csv $msTeamsMbxinputfile).ExternalDirectoryObjectId
+              
+          $msTeamsMbx = $null                  
+          $msTeamsMbxArray = $msTeamsMbxArray | Where-Object { $_ }
+          $msTeamsMbx = $MmsTeamsMbxsarray[0..999] -join ","
+          $msTeamsMbx = $msTeamsMbx -split ' *, *'
+                                              
+          New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -ExchangeLocation $msTeamsMbx -Enabled $True -Verbose
+          New-CaseHoldRule -Name "$holdName" -Policy "$holdName" -ContentMatchQuery "" -Verbose
+
+     } #if
+
 
 
 } #try
