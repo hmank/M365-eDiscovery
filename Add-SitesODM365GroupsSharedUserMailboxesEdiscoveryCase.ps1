@@ -1,7 +1,7 @@
 ﻿#############################################################################
 #  This script is used to read from a csv containing Microsoft 365 groups,
 #  Shared mailboxes, SharePoint and OneDrive Sites.
-#  The script will import into an existing eDiscovery Case.
+#  The script will import into an existing eDiscovery Case. 
 #
 # August 20, 2021
 #
