@@ -107,6 +107,8 @@ Try{
 
 
                 New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -SharePointLocation $spsurls -Enabled $True -Verbose
+                New-CaseHoldRule -Name "$holdName" -Policy "$holdName" -ContentMatchQuery "" -Verbose
+
 
         } #if
 
@@ -130,6 +132,8 @@ Try{
                 $M365Groups = $M365Groups -split ' *, *'
                                               
               New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -ExchangeLocation $M365Groups -Enabled $True -Verbose
+              New-CaseHoldRule -Name "$holdName" -Policy "$holdName" -ContentMatchQuery "" -Verbose
+
         } #if
 
 
@@ -152,6 +156,8 @@ Try{
                 $SharedMBX = $SharedMBXArray -split ' *, *'
                                               
               New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -ExchangeLocation $SharedMBX -Enabled $True -Verbose
+              New-CaseHoldRule -Name "$holdName" -Policy "$holdName" -ContentMatchQuery "" -Verbose
+
         } #if
 
                 If ($userInput -eq 4){   #Import User Mailboxes and Onedrive sites
@@ -181,6 +187,8 @@ Try{
 
                                               
               New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -ExchangeLocation $importUserMBX -SharePointLocation $importUserOD -Enabled $True -verbose -Force
+              New-CaseHoldRule -Name "$holdName" -Policy "$holdName" -ContentMatchQuery "" -Verbose
+
 
 
         } #if
