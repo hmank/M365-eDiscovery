@@ -21,7 +21,7 @@ $exportCSVPath = $(Write-Host "Enter the name full path to export the csv files 
 Start-Transcript -LiteralPath "$logsdir\GetSpSites-$month-$day-$hour-$minute.log"  -NoClobber -Append
 
 $mySiteDomain = Read-Host "Enter the domain name for your SharePoint organization. We use this name to connect to SharePoint admin center`
-, ONLY enter the domain name not the full URL. For example, '163gc' in 'https://163gc-admin.sharepoint.com'"
+, ONLY enter the domain name not the full URL. For example, in 'https://yyyzz-admin.sharepoint.com'"
 
 Import-Module PnP.PowerShell
 Connect-PnPOnline -Url https://$mySiteDomain-admin.sharepoint.com -UseWebLogin
