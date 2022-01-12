@@ -21,7 +21,8 @@ $exportCSVPath = $(Write-Host "Enter the name full path to export the csv files 
 Start-Transcript -LiteralPath "$logsdir\GetSpSites-$month-$day-$hour-$minute.log"  -NoClobber -Append
 
 $mySiteDomain = Read-Host "Enter the domain name for your SharePoint organization. We use this name to connect to SharePoint admin center`
-, ONLY enter the domain name not the full URL. For example, in 'https://yyyzz-admin.sharepoint.com'"
+, ONLY enter the DOMAIN name not the full URL. For example, if your admin
+ URL is 'https://yyyzz-admin.sharepoint.com' ENTER only yyyzzz"
 
 Import-Module PnP.PowerShell
 Connect-PnPOnline -Url https://$mySiteDomain-admin.sharepoint.com -UseWebLogin
@@ -51,10 +52,12 @@ Try {
         }
     }
 
-
-
-
+    Get-Content "$exportCSVPath\AllSharePointSites-$month-$day.csv"  | Where-Object { $_ -notmatch "sharepoint.com/search" } | Out-File "$exportCSVPath\AllSharePointSites-$month-$day-1.csv" -Force
+    Get-Content "$exportCSVPath\AllSharePointSites-$month-$day-1.csv"  | Where-Object { $_ -notmatch "my.sharepoint.com/" } | Out-File "$exportCSVPath\AllSharePointSites-$month-$day-Final.csv" -Force
+    Remove-Item "$exportCSVPath\AllSharePointSites-$month-$day.csv" 
+    Remove-Item "$exportCSVPath\AllSharePointSites-$month-$day-1.csv"
 }
+
 Catch {
     write-host -f Red "Error:" $_.Exception.Message
 }
