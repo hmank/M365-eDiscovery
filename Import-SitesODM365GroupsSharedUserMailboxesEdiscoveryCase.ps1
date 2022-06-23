@@ -227,8 +227,7 @@ Try{
                if ($fileexists -ne 'True') { write-host "$UserMBXinputfile doesn't exist. Please enter a valid path and filename." -foregroundcolor Yellow }
           }while ($fileexists -ne 'True')
             
-             
-                               
+                                           
           [Array]  $importUserMBXArray = @(Import-Csv $UserMBXinputfile).PrimarySmtpAddress
               
           $importUserMBX = $null                  
