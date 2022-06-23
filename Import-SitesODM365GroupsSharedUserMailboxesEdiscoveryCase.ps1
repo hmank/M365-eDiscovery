@@ -27,19 +27,20 @@ if (!$SccSession)
 
 
 write-host "***********************************************"
-write-host "   Security & Compliance Center PowerShell  " -foregroundColor yellow -backgroundcolor darkgreen
-write-host "   Add Sharepoint or OneDrive Sites, User, Microsoft 365 Groups,Shared Mailboxes to eDiscovery Case   " -foregroundColor yellow -backgroundcolor darkgreen 
+write-host "   Security & Compliance Center PowerShell  " -foregroundColor yellow -backgroundcolor black
+write-host "   Add Sharepoint or OneDrive Sites, User, Microsoft 365 Groups,Shared Mailboxes to eDiscovery Case   " -foregroundColor yellow -backgroundcolor black 
 write-host "***********************************************"
 " "
 do{
 write-host "***********************************************"
-write-host "   Please select below the option you wish to add to the eDiscovery Case " -foregroundColor yellow -backgroundcolor darkgreen
-write-host "   [1] - Sharepoint Sites   " -foregroundColor yellow -backgroundcolor darkgreen
-write-host "   [2] - Microsoft 365 Groups   " -foregroundColor yellow -backgroundcolor darkgreen
-write-host "   [3] - Shared Mailboxes  " -foregroundColor yellow -backgroundcolor darkgreen 
-write-host "   [4] - User Mailboxes and OneDrive Sites  " -foregroundColor yellow -backgroundcolor darkgreen 
-write-host "   [5] - Teams User chats (User mailboxes)" -foregroundColor yellow -backgroundcolor darkgreen 
-write-host "   [6] - Teams Channel conversations (Teams Mailboxes)" -foregroundColor yellow -backgroundcolor darkgreen 
+write-host "   Please select below the option you wish to add to the eDiscovery Case " -foregroundColor yellow -backgroundcolor black
+write-host "   [1] - Sharepoint Sites   " -foregroundColor yellow -backgroundcolor black
+write-host "   [2] - Microsoft 365 Groups   " -foregroundColor yellow -backgroundcolor black
+write-host "   [3] - Shared Mailboxes  " -foregroundColor yellow -backgroundcolor black 
+write-host "   [4] - User Mailboxes" -foregroundColor yellow -backgroundcolor black
+write-host "   [5] - OneDrive Sites  " -foregroundColor yellow -backgroundcolor black 
+write-host "   [6] - Teams User chats (User mailboxes)" -foregroundColor yellow -backgroundcolor black 
+write-host "   [7] - Teams Channel conversations (Teams Mailboxes)" -foregroundColor yellow -backgroundcolor black 
 
 $userInput = Read-Host "Select Option & Press Enter: " 
 write-host "***********************************************"
@@ -49,9 +50,10 @@ switch ($userInput){
     '1' {"[1]- Sharepoint Sites Selected"} 
     '2' {"[2]- Microsoft365 Groups Selected"}
     '3' {"[3]- Shared Mailboxes Selected"}
-    '4' {"[4]- User Mailboxes and OneDrive Sites"}
-    '5' {"[5]- Teams User chats (User mailboxes)" }
-    '6' {"[6]- Teams Channel conversations (Teams Mailboxes)" }
+    '4' {"[4]- User Mailboxes"}
+    '5' {"[5]- OneDrive Sites"}
+    '6' {"[6]- Teams User chats (User mailboxes)" }
+    '7' {"[7]- Teams Channel conversations (Teams Mailboxes)" }
 
     }#switch
     
@@ -62,8 +64,8 @@ While (($userInput -ne '1') -and ($userInput -ne '2') -and ($userInput -ne '3') 
 
 # Get other required information
 do{
-Get-ComplianceCase -CaseType AdvancedEdiscovery | Select-Object Name, Casetype ; Get-ComplianceCase | Select-Object Name, Casetype
-$casename = $(Write-Host "Enter the name of the existing case: " -foregroundColor yellow -backgroundcolor darkgreen -NoNewline; Read-Host)
+
+$casename = $(Write-Host "Enter the name of the existing case: " -foregroundColor yellow -backgroundcolor black -NoNewline; Read-Host)
 $caseexists = (get-compliancecase -identity "$casename" -erroraction SilentlyContinue).isvalid
 if($caseexists -ne 'True')
 {""
@@ -75,9 +77,8 @@ While($caseexists -ne 'True')
 write-host "***********************************************"
 
 do{
-Get-caseholdpolicy *| Select Name
 
-$holdName = $(Write-host "Enter the name of a new hold: " -foregroundColor yellow -backgroundcolor darkgreen -NoNewline; Read-Host)
+$holdName = $(Write-host "Enter a unique name of a new case hold: " -foregroundColor yellow -backgroundcolor black -NoNewline; Read-Host)
 $holdexists=(get-caseholdpolicy -identity "$holdname" -case "$casename" -erroraction SilentlyContinue).isvalid
 if($holdexists -eq 'True')
 {""
@@ -160,10 +161,10 @@ Try{
 
         } #if
 
-                If ($userInput -eq 4){   #Import User Mailboxes and Onedrive sites
+                If ($userInput -eq 4){   #Import User Mailboxes
         do{
         ""
-        $UserMBXODinputfile = $(Write-Host "Enter the name full path of the csv file that contains the users mailbox and onedrive to place on hold. eg c:\Temp\AllM365Groups.csv :" -NoNewline;read-host)
+        $UserMBXODinputfile = $(Write-Host "Enter the name full path of the csv file that contains the users mailboxes to place on hold. eg c:\Temp\AllM365Groups.csv :" -NoNewline;read-host)
         ""
         $fileexists = test-path -path $UserMBXODinputfile
              if($fileexists -ne 'True'){write-host "$UserMBXODinputfile doesn't exist. Please enter a valid path and filename." -foregroundcolor Yellow}
@@ -178,15 +179,8 @@ Try{
                 $importUserMBX = $importUserMBXArray[0..999] -join ","
                 $importUserMBX = $importUserMBXArray -split ' *, *'
 
-                [Array]  $importUserODArray = @(Import-Csv $UserMBXODinputfile).PersonalURL
-              
-                $importUserOD = $null                  
-                $importUserODArray = $importUserODArray | Where-Object {$_}
-                $importUserOD = $importUserODArray[0..999] -join ","
-                $importUserOD = $importUserODArray -split ' *, *'
-
-                                              
-              New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -ExchangeLocation $importUserMBX -SharePointLocation $importUserOD -Enabled $True -verbose -Force
+                                                              
+              New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -ExchangeLocation $importUserMBX -Enabled $True -verbose -Force
               New-CaseHoldRule -Name "$holdName" -Policy "$holdName" -ContentMatchQuery "" -Verbose
 
 
@@ -194,6 +188,36 @@ Try{
         } #if
 
      If ($userInput -eq 5) {
+          #Import User Onedrive Sites
+          do {
+               ""
+               $UserMBXODinputfile = $(Write-Host "Enter the name full path of the csv file that contains the users OneDrive sites to place on hold. eg c:\Temp\AllM365Groups.csv :" -NoNewline; read-host)
+               ""
+               $fileexists = test-path -path $UserMBXODinputfile
+               if ($fileexists -ne 'True') { write-host "$UserMBXODinputfile doesn't exist. Please enter a valid path and filename." -foregroundcolor Yellow }
+          }while ($fileexists -ne 'True')
+            
+         
+          [Array]  $importUserODArray = @(Import-Csv $UserMBXODinputfile).PersonalURL
+              
+          $importUserOD = $null                  
+          $importUserODArray = $importUserODArray | Where-Object { $_ }
+          $importUserOD = $importUserODArray[0..999] -join ","
+          $importUserOD = $importUserODArray -split ' *, *'
+
+                                              
+          New-CaseHoldPolicy -Name "$holdName" -Case "$casename" -SharePointLocation $importUserOD -Enabled $True -verbose -Force
+          New-CaseHoldRule -Name "$holdName" -Policy "$holdName" -ContentMatchQuery "" -Verbose
+
+
+
+     } #if
+
+
+
+
+
+     If ($userInput -eq 6) {
           #Import User Teams chat (User mailboxes)
           do {
                ""
@@ -218,7 +242,7 @@ Try{
 
      } #if
 
-     If ($userInput -eq 6) {
+     If ($userInput -eq 7) {
           #Import Microsoft 365 Groups.
           do {
                ""
