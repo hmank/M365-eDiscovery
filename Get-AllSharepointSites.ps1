@@ -25,7 +25,7 @@ $mySiteDomain = Read-Host "Enter the domain name for your SharePoint organizatio
  URL is 'https://yyyzz-admin.sharepoint.com' ENTER only yyyzzz"
 
 Import-Module PnP.PowerShell
-Connect-PnPOnline -Url https://$mySiteDomain-admin.sharepoint.com -UseWebLogin
+Connect-PnPOnline -Url https://$mySiteDomain-admin.sharepoint.com -Interactive
 
 
 Try {
